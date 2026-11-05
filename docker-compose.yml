@@ -1,0 +1,36 @@
+name: campus-vision-raatbek
+services:
+  mediamtx:
+    image: bluenviron/mediamtx:1
+    container_name: raatbek-mediamtx
+    restart: unless-stopped
+    environment:
+      MTX_RTSPTRANSPORTS: tcp
+      MTX_WEBRTCADDITIONALHOSTS: "127.0.0.1"
+    ports:
+      - "127.0.0.1:8554:8554/tcp"
+      - "127.0.0.1:8888:8888/tcp"
+      - "127.0.0.1:8889:8889/tcp"
+      - "8189:8189/udp"
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: raatbek-mosquitto
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:1883:1883/tcp"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:ro
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+  nodered:
+    image: nodered/node-red:latest
+    container_name: raatbek-nodered
+    restart: unless-stopped
+    depends_on:
+      - mosquitto
+    ports:
+      - "127.0.0.1:1880:1880/tcp"
+    volumes:
+      - node_red_data:/data
+volumes:
+  node_red_data:
